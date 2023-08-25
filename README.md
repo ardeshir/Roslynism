@@ -64,3 +64,5 @@ public class Compiler
 dotnet add package Microsoft.CodeAnalysis
 dotnet add package Microsoft.CodeAnalysis.CSharp
 ```
+
+![Steps to follow ](RoslynCompiler.png)
