@@ -1,11 +1,11 @@
-### Here is an example C# code that uses the Roslyn Compiler API to read in a C# file, compile it into a DLL and load its types to use in another assembly:
+###  Roslyn Compiler API to read in a (C#) .rl file, compile it into a DLL and load its types to use in another assembly:
 
 ```csharp
+using System;
+using System.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
-using System;
-using System.IO;
 using System.Reflection;
 
 namespace RoslynCompiler {
@@ -16,15 +16,19 @@ public class Compiler
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
 
-        string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        MetadataReference[] references = new MetadataReference[]
-        {
-            MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "mscorlib.dll")),
-            MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")),
-            MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")),
-            MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-            MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
-        };
+        string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);  
+        string systemRuntimePath = Path.Combine(assemblyPath, "System.Runtime.dll");  
+        string systemCorePath = Path.Combine(assemblyPath, "System.Core.dll");  
+  
+        MetadataReference[] references = new MetadataReference[]  
+        {  
+            MetadataReference.CreateFromFile(systemRuntimePath),  
+            MetadataReference.CreateFromFile(systemCorePath),  
+            MetadataReference.CreateFromFile(typeof(object).Assembly.Location),  
+            MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),  
+        };  
+
+
 
         CSharpCompilation compilation = CSharpCompilation.Create(assemblyName)
             .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
@@ -53,35 +57,6 @@ public class Compiler
 }
 }
 ```
-
-You can use this class as follows:
-
-```csharp
-string code = @"
-using System;
-
-namespace MyNamespace
-{
-    public class MyClass
-    {
-        public static void SayHello()
-        {
-            Console.WriteLine(""Hello from Roslyn!"");
-        }
-    }
-}
-";
-
-Assembly assembly = RoslynCompiler.Compile(code, "MyAssembly");
-
-Type type = assembly.GetType("MyNamespace.MyClass");
-MethodInfo method = type.GetMethod("SayHello");
-method.Invoke(null, null); // outputs "Hello from Roslyn!" to the console
-
-```
-
-## This code dynamically compiles the `code` string into a DLL named "MyAssembly" and loads it into memory using the `Assembly.Load` method. You can then use reflection to get a `MethodInfo` object for the `SayHello` method and invoke it to execute the code.
-
 ## To add Microsoft Roslyn compiler package to your project, you may use the following `dotnet add package` statements:
 - If you want to add the packages to a .NET Core run:
 
